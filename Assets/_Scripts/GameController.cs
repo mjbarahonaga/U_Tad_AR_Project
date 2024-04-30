@@ -6,9 +6,28 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+
     public static Action<bool> OnPause;
     public static Action OnStartSimulation;
 
+    [SerializeField]
+    private GameObject _solarSystem;
+
+    private void Start()
+    {
+        PinchDetection.OnScale += ScaleSolarSystem;
+    }
+
+    private void OnDestroy()
+    {
+        PinchDetection.OnScale -= ScaleSolarSystem;
+    }
+
+    private void ScaleSolarSystem(float value)
+    {
+        if(_solarSystem.activeInHierarchy)
+            _solarSystem.transform.localScale += Vector3.one * value;
+    }
 
 #if UNITY_EDITOR
     [Header("TEST")]
@@ -23,17 +42,6 @@ public class GameController : MonoBehaviour
             currentStatePause = Pause;
             OnPause.Invoke(Pause);
         }
-        //if (currentStatePause != Pause && Pause == true)
-        //{
-        //    currentStatePause = Pause;
-        //    Timing.PauseCoroutines();
-
-        //}
-        //else if (currentStatePause != Pause && Pause == false)
-        //{
-        //    currentStatePause = Pause;
-        //    Timing.ResumeCoroutines();
-        //}
     }
 #endif
 }
