@@ -20,7 +20,15 @@ public class Orbits : MonoBehaviour, IPausable
     {
         GameController.OnPause += Pause;
         GameController.OnStartSimulation += ActivateUpdate;
-        
+        GameController.OnCheckData += CheckData;
+
+    }
+    private void OnDestroy()
+    {
+        GameController.OnPause -= Pause;
+        GameController.OnStartSimulation -= ActivateUpdate;
+        GameController.OnCheckData -= CheckData;
+        Timing.KillCoroutines(_coroutineUpdate);
     }
 
     private void Awake()
@@ -37,12 +45,6 @@ public class Orbits : MonoBehaviour, IPausable
         _orbitalRadius = (transform.position - _transformTarget.position).magnitude;
     }
 
-    private void OnDestroy()
-    {
-        GameController.OnPause -= Pause;
-        GameController.OnStartSimulation -= ActivateUpdate;
-        Timing.KillCoroutines(_coroutineUpdate);
-    }
     private bool _pause = false;
     public void Pause(bool pause)
     {
@@ -68,6 +70,11 @@ public class Orbits : MonoBehaviour, IPausable
     public void ActivateUpdate()
     {
         _coroutineUpdate = Timing.RunCoroutine(UpdateCoroutine(), Segment.FixedUpdate);
+    }
+
+    public void CheckData()
+    {
+        _orbitalRadius = (transform.position - _transformTarget.position).magnitude;
     }
 
     public IEnumerator<float> UpdateCoroutine()

@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
 
     public static Action<bool> OnPause;
     public static Action OnStartSimulation;
+    public static Action OnCheckData;
 
     [SerializeField]
     private GameObject _solarSystem;
@@ -26,14 +27,22 @@ public class GameController : MonoBehaviour
     private void ScaleSolarSystem(float value)
     {
         if(_solarSystem.activeInHierarchy)
+        {
             _solarSystem.transform.localScale += Vector3.one * value;
+            OnCheckData?.Invoke();
+        }
+            
     }
 
 #if UNITY_EDITOR
     [Header("TEST")]
     public bool Activate = false;
     public bool Pause = false;
+    public float ScaleFactor = 1.0f;
+    public bool IncreaseSize = false;
+    public bool ReduceSize = false;
     private bool currentStatePause = false;
+
     private void OnValidate()
     {
         if(Activate) OnStartSimulation.Invoke();
@@ -41,6 +50,17 @@ public class GameController : MonoBehaviour
         {
             currentStatePause = Pause;
             OnPause.Invoke(Pause);
+        }
+
+        if(IncreaseSize)
+        {
+            ScaleSolarSystem(ScaleFactor);
+            IncreaseSize = false;
+        }
+        if(ReduceSize)
+        {
+            ScaleSolarSystem(-ScaleFactor);
+            ReduceSize = false;
         }
     }
 #endif
