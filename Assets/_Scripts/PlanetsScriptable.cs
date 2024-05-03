@@ -24,5 +24,7 @@ public class PlanetsScriptable : ScriptableObject
     [Tooltip("In Seconds")]
     public float ObitalPeriod = 60.0f;
     [Tooltip("In Seconds")]
-    public float RotationPeriod = 0.1643f;  //60/365
+    public float RotationPeriod = 0.1643f;  //60 sec /365 (Solar cycle days)
+    [TextArea]
+    public string Info;
 }

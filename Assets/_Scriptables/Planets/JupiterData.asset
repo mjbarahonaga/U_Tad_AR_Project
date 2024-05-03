@@ -15,3 +15,8 @@ MonoBehaviour:
   Planet: 5
   ObitalPeriod: 137.8
   RotationPeriod: 0.067363
+  Info: "Jupiter is a world of extremes. It's the largest planet in our solar system
+    \u2013 if it were a hollow shell, 1,000 Earths could fit inside. It's also the
+    oldest planet, forming from the dust and gases left over from the Sun's formation
+    4.5 billion years ago. But it has the shortest day in the solar system, taking
+    only 10.5 hours to spin around once on its axis."

@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MEC;
-using static UnityEngine.Rendering.DebugUI;
 using Unity.VisualScripting;
 
 public class RotationPeriod : MonoBehaviour, IPausable
@@ -14,6 +13,7 @@ public class RotationPeriod : MonoBehaviour, IPausable
     private CoroutineHandle _coroutineUpdate;
 
     private bool _pause = false;
+    public PlanetsScriptable GetData { get => _planet; }
     public void Pause(bool pause)
     {
         if (_coroutineUpdate != default(CoroutineHandle))

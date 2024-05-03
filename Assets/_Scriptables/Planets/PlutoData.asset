@@ -15,3 +15,18 @@ MonoBehaviour:
   Planet: 9
   ObitalPeriod: 380.8
   RotationPeriod: 1.049877
+  Info: "Pluto is a complex and mysterious world with mountains, valleys, plains,
+    craters, and glaciers. It is located in the distant Kuiper Belt.\r\n\r\nDiscovered
+    in 1930, Pluto was long considered our solar system's ninth planet. But after
+    the discovery of similar intriguing worlds deeper in the Kuiper Belt, tiny Pluto
+    was reclassified as a dwarf planet in 2006 by the International Astronomical
+    Union.\r\n\r\nPluto is only about 1,400 miles wide. At that small size, Pluto
+    is only about half the width of the United States. It's about 3.6 billion miles
+    away from the Sun, and it has a thin atmosphere composed mostly of nitrogen,
+    methane, and carbon monoxide. On average, Pluto\u2019s temperature is -387\xB0F
+    (-232\xB0C), making it too cold to sustain life.\r\n\r\nPluto is orbited by five
+    known moons, the largest of which is Charon. Charon is about half the size of
+    Pluto itself, making it the largest satellite relative to the planet it orbits
+    in our solar system. Pluto and Charon are often referred to as a \"double planet.\"\r\n\r\nThe
+    only spacecraft to explore Pluto up close was NASA's New Horizons. It flew by
+    the dwarf planet and its moons in 2015."

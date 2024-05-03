@@ -17,23 +17,20 @@ public class PinchDetection : MonoBehaviour
     {
         _controls = new TouchControls();
     }
-
-    private void OnEnable()
-    {
-        _controls.Enable();
-    }
-
-    private void OnDisable()
-    {
-        _controls.Disable();
-    }
-
     private void Start()
     {
         _controls.Touch.SecondaryTouchContact.started += _ => ScaleStart();
         _controls.Touch.SecondaryTouchContact.canceled += _ => ScaleEnd();
-
+        GameController.OnStateChange += StateChange;
     }
+
+    private void StateChange(GameState state)
+    {
+        //We just want to detect touches while we are in View State
+        if (state == GameState.View) _controls.Enable();
+        else _controls.Disable();
+    }
+
     private void ScaleStart()
     {
         _zoomCoroutine = Timing.RunCoroutine(PinchDetectionCoroutine());
