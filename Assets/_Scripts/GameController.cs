@@ -15,6 +15,7 @@ public enum GameState
 
 public class GameController : MonoBehaviour
 {
+    #region Events
     public static Action<bool> OnPause;
     public static Action OnStartSimulation;
     public static Action OnCheckData;
@@ -22,13 +23,25 @@ public class GameController : MonoBehaviour
     public static Action<GameState> OnStateChange;
     public static Action<ARSelectable> OnSelected;
     public static Func<GameState> OnGetState;
+    #endregion
+
+    [Range(1f, 20f)]
+    public static float SpeedSimulation = 1f;
 
     [SerializeField] private ARRaycastInteraction _arRaycastInteraction;
-    [SerializeField] private GameObject _solarSystem;
-
     [SerializeField] private GameState _currentState = GameState.Idle;
 
+    [SerializeField] private float _minDistanceSwipping = 0.2f;
+    [SerializeField] private float _maxTimeSwipping = 1f;
+
+    private GameObject _solarSystem;
     private CoroutineHandle _currentCoroutine;
+    private ARSelectable _currentSelected = null;
+
+    private Vector2 _startPosSwipe;
+    private Vector2 _endPosSwipe;
+    private float _startTimeSwipe;
+    private float _endTimeSwipe;
 
     public GameState CurrentState
     {
@@ -47,6 +60,10 @@ public class GameController : MonoBehaviour
 
     public void SetState(GameState value) => CurrentState = value;
 
+    public void SetSpeedSimulation(float value)
+    {
+        SpeedSimulation = value;
+    }
     private void UpdateState()
     {
         Timing.KillCoroutines(_currentCoroutine);
@@ -62,17 +79,61 @@ public class GameController : MonoBehaviour
                 _currentCoroutine = Timing.RunCoroutine(UpdatePlacing());
                 break;
             case GameState.View:
-                _currentCoroutine = Timing.RunCoroutine(UpdateView(), Segment.SlowUpdate);
+                _currentCoroutine = Timing.RunCoroutine(UpdateView());
                 break;
             case GameState.Selecting:
-                _currentCoroutine = Timing.RunCoroutine(UpdateSelecting());
+                //_currentCoroutine = Timing.RunCoroutine(UpdateSelecting());
                 break;
+        }
+    }
+
+    //private void SwipeEnd(Vector2 pos, float time)
+    //{
+    //    _startPosSwipe = pos;
+    //    _startTimeSwipe = time;
+    //}
+
+    //private void SwipeStart(Vector2 pos, float time)
+    //{
+    //    _endPosSwipe = pos;
+    //    _endTimeSwipe = time;
+    //    DetectSwipe();
+    //}
+
+    //private void DetectSwipe()
+    //{
+    //    if(Vector3.Distance(_startPosSwipe, _endPosSwipe) >= _minDistanceSwipping &&
+    //        (_endTimeSwipe - _startTimeSwipe) >= _maxTimeSwipping)
+    //    {
+    //        Debug.DrawLine(_startPosSwipe, _endPosSwipe, Color.red, 2f);
+    //        Vector3 direction = _endPosSwipe - _startPosSwipe;
+    //        Vector2 direction2D = new Vector2(direction.x, direction.y).normalized;
+    //        //SwipeDirection(direction2D);
+    //    }
+    //}
+
+    //private void SwipeDirection(Vector2 direction)
+    //{
+    //    if (Vector2.Dot(Vector2.left, direction) > 0.3f) CheckToRotateSolarSystem(1f);
+    //    if (Vector2.Dot(Vector2.right, direction) > 0.3f) CheckToRotateSolarSystem(-1f);
+    //}
+
+    private void CheckToRotateSolarSystem()
+    {
+        if(_solarSystem.activeInHierarchy && _currentState == GameState.View)
+        {
+            if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Moved)
+            {
+                float rotateHorizontal = Input.GetTouch(0).deltaPosition.x * 0.5f;
+                _solarSystem.transform.Rotate(Vector3.up, rotateHorizontal, Space.World);
+            }
+            
         }
     }
 
     private void ScaleSolarSystem(float value)
     {
-        if(_solarSystem.activeInHierarchy)
+        if(_solarSystem.activeInHierarchy && _currentState == GameState.View)
         {
             _solarSystem.transform.localScale += Vector3.one * value;
             OnCheckData?.Invoke();
@@ -87,6 +148,7 @@ public class GameController : MonoBehaviour
         {
             if (_arRaycastInteraction.DetectEnvironment())
             {
+
                 SetState(GameState.Placing);
             }
             yield return Timing.WaitForOneFrame;
@@ -106,36 +168,58 @@ public class GameController : MonoBehaviour
 
     private IEnumerator<float> UpdateView()
     {
-        ARSelectable _currentSelected = null;
-        while(_currentSelected == null)
+        bool selected = false;
+        while(selected == false)
         {
-            _currentSelected = _arRaycastInteraction.DetectPlanetSelection();
-            if(_currentSelected != null )
+            CheckToRotateSolarSystem();
+            if (_currentSelected != null )
             {
+                selected = true;
                 OnSelected?.Invoke(_currentSelected);
                 SetState(GameState.Selecting);
             }
             yield return Timing.WaitForOneFrame;
         }
+        _currentSelected = null;
     }
+
 
     private IEnumerator<float> UpdateSelecting()
     {
         yield return 0;
     }
 
+    public void TappedScreen(Vector2 touchPos)
+    {
+        _currentSelected =  _arRaycastInteraction.DetectPlanetSelection(touchPos);
+#if UNITY_EDITOR
+        Debug.Log(_currentSelected?.ToString());
+#endif
+    }
+
+    public void PlaySimulation() => OnPause?.Invoke(false);
+    public void StopSimulation() => OnPause?.Invoke(true);
+
     #endregion
     #region UNITY METHODS
     private void Start()
     {
-        PinchDetection.OnScale += ScaleSolarSystem;
+        //TouchDetection.OnStartTouch += SwipeStart;
+        //TouchDetection.OnEndTouch += SwipeEnd;
+
+        TouchDetection.OnScale += ScaleSolarSystem;
+        TouchDetection.OnTapScreen += TappedScreen;
         OnGetState += () => _currentState;
         CurrentState = GameState.Discovering;
     }
 
     private void OnDestroy()
     {
-        PinchDetection.OnScale -= ScaleSolarSystem;
+        //TouchDetection.OnStartTouch -= SwipeStart;
+        //TouchDetection.OnEndTouch -= SwipeEnd;
+
+        TouchDetection.OnScale -= ScaleSolarSystem;
+        TouchDetection.OnTapScreen -= TappedScreen;
     }
 
 #endregion
@@ -168,6 +252,7 @@ public class GameController : MonoBehaviour
             ScaleSolarSystem(-ScaleFactor);
             ReduceSize = false;
         }
+
     }
 #endif
 }

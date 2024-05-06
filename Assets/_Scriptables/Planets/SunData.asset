@@ -15,3 +15,10 @@ MonoBehaviour:
   Planet: 0
   ObitalPeriod: 0
   RotationPeriod: 5.8600335
+  Info: "The Sun's gravity holds the solar system together, keeping everything \u2013
+    from the biggest planets to the smallest particles of debris \u2013 in its orbit.
+    The connection and interactions between the Sun and Earth drive the seasons,
+    ocean currents, weather, climate, radiation belts and auroras. Though it is special
+    to us, there are billions of stars like our Sun scattered across the Milky Way
+    galaxy.\r\n\r\nThe Sun has many names in many cultures. The Latin word for Sun
+    is \u201Csol,\u201D which is the main adjective for all things Sun-related: solar."

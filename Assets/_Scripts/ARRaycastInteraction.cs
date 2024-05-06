@@ -47,15 +47,16 @@ public class ARRaycastInteraction : MonoBehaviour
 
         if (_placedObject != null)
         {
+            float rotateHorizontal = 0.5f;
 #if UNITY_EDITOR
             if ( Input.GetMouseButton(0))
             {
                 _placedObject.transform.position = _placementPose.position;
 #else
             if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Moved){
-            float rotateHorizontal = Input.GetTouch(0).deltaPosition.x * 0.5f;
+                rotateHorizontal = Input.GetTouch(0).deltaPosition.x * 0.5f;
 #endif
-                _placedObject.transform.Rotate(0f, -0.5f, 0f, Space.World);
+                _placedObject.transform.Rotate(0f, -rotateHorizontal, 0f, Space.World);
             }
 
             if (Input.touchCount == 1)
@@ -71,6 +72,7 @@ public class ARRaycastInteraction : MonoBehaviour
 #endif
                 result = _placedObject;
                 _placedObject = null;
+                SetIndicatorState(false);
             }
         }
 
@@ -125,27 +127,18 @@ public class ARRaycastInteraction : MonoBehaviour
             hits, TrackableType.Planes);
     }
 
-    public ARSelectable DetectPlanetSelection()
+    public ARSelectable DetectPlanetSelection(Vector2 pos)
     {
         Ray ray;
-#if UNITY_EDITOR
-        var screenCenter = _arCamera.ViewportToScreenPoint(new Vector3(0.5f, 0.5f));
-        var hits = new List<ARRaycastHit>();
-        _arRaycastManager.Raycast(screenCenter, hits, TrackableType.Planes);
-        if (hits.Count <= 0) return null;
-        ray = _arCamera.ScreenPointToRay(hits[0].pose.position);
-        if (Input.GetMouseButtonDown(0))
+
+        ray = _arCamera.ScreenPointToRay(pos);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, float.MaxValue))
         {
-#else
-        ray = _arCamera.ScreenPointToRay(Input.GetTouch(0).position);
-        if(Input.GetTouch(0).phase == TouchPhase.Began) { 
-#endif
-            if(Physics.Raycast(ray, out RaycastHit hit, 50f))
-            {
-                ARSelectable result = hit.collider.gameObject.GetComponent<ARSelectable>();
-                return result;
-            }
+            ARSelectable result = hit.collider.gameObject.GetComponent<ARSelectable>();
+            return result;
         }
+        
         return null;
     }
     #endregion

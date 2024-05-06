@@ -11,27 +11,36 @@ public class Orbits : MonoBehaviour, IPausable
     [SerializeField] private float _orbitalRadius;
     [SerializeField] private float _orbitalSpeed;   
     [SerializeField] private float _angle;
+    [SerializeField] private bool _isVariantPlanet = false;
 
     private CoroutineHandle _coroutineUpdate;
 
     private void OnEnable()
     {
-        GameController.OnPause += Pause;
-        GameController.OnStartSimulation += ActivateUpdate;
-        GameController.OnCheckData += CheckData;
+        if(_isVariantPlanet == false)
+        {
+            GameController.OnPause += Pause;
+            GameController.OnStartSimulation += ActivateUpdate;
+            GameController.OnCheckData += UpdateTransform;
+        }
+        ActivateUpdate();
 
     }
     private void OnDestroy()
     {
-        GameController.OnPause -= Pause;
-        GameController.OnStartSimulation -= ActivateUpdate;
-        GameController.OnCheckData -= CheckData;
+        if (_isVariantPlanet == false)
+        {
+            GameController.OnPause -= Pause;
+            GameController.OnStartSimulation -= ActivateUpdate;
+            GameController.OnCheckData -= UpdateTransform;
+        }
         Timing.KillCoroutines(_coroutineUpdate);
+
     }
 
     private void Awake()
     {
-        _angle = 0;
+        _angle = Random.Range(0, 360f);
         float radians = Mathf.Deg2Rad * _angle;
 
         float x = _orbitalRadius * Mathf.Cos(radians);
@@ -46,7 +55,8 @@ public class Orbits : MonoBehaviour, IPausable
     private bool _pause = false;
     public void Pause(bool pause)
     {
-        if(_coroutineUpdate != default(CoroutineHandle))
+        if (_isVariantPlanet) return;
+            if (_coroutineUpdate != default(CoroutineHandle))
         {
             if (pause == true)
             {
@@ -70,7 +80,8 @@ public class Orbits : MonoBehaviour, IPausable
         _coroutineUpdate = Timing.RunCoroutine(UpdateCoroutine(), Segment.FixedUpdate);
     }
 
-    public void CheckData()
+    // 
+    public void UpdateTransform()
     {
         _orbitalRadius = (transform.position - _transformTarget.position).magnitude;
     }
@@ -80,9 +91,11 @@ public class Orbits : MonoBehaviour, IPausable
         if (_coroutineUpdate != default(CoroutineHandle)) yield break;
         while (true)
         {
-            if(_pause == false)
+            if(_pause == false || _isVariantPlanet)
             {
-                _angle += _orbitalSpeed * Time.fixedDeltaTime; // * Global Speed (Manager data )
+                float speedSimulation = GameController.SpeedSimulation;
+                if (_isVariantPlanet) speedSimulation = 1f;
+                _angle += _orbitalSpeed * Time.fixedDeltaTime * speedSimulation; // * Global Speed (Manager data )
                 float radians = Mathf.Deg2Rad * _angle;
 
                 float x = _orbitalRadius * Mathf.Cos(radians);
