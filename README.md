@@ -1,6 +1,6 @@
 # AR PROJECT
 
-AR Project using Unity and AR Foundation for U-TAD
+AR Project using Unity and AR Foundation for U-TAD University
 
 ## Demo
 
